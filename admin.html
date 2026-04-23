@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin | All Cities Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+  <nav class="main-header navbar navbar-expand navbar-dark navbar-primary">
+    <ul class="navbar-nav">
+      <li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a></li>
+      <li class="nav-item d-none d-sm-inline-block"><a href="#" class="nav-link">Admin Control Panel</a></li>
+    </ul>
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item"><a href="#" onclick="logout()" class="nav-link text-white"><i class="fas fa-power-off"></i> Logout</a></li>
+    </ul>
+  </nav>
+
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="#" class="brand-link"><span class="brand-text font-weight-light">Sales Admin</span></a>
+    <div class="sidebar">
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column">
+          <li class="nav-item"><a href="#" class="nav-link active"><i class="nav-icon fas fa-globe"></i> <p>All Cities Data</p></a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <div class="content-wrapper p-4">
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6"><h1>Master Sales Report</h1></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="card card-dark">
+      <div class="card-header">
+        <h3 class="card-title">Consolidated Data (Every City)</h3>
+        <div class="card-tools">
+          <button class="btn btn-tool" onclick="loadAdminData()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover table-bordered text-nowrap">
+          <thead class="bg-light">
+            <tr>
+              <th>City</th>
+              <th>Enq No</th>
+              <th>Eval No</th>
+              <th>Pur Price</th>
+              <th>Sale Price</th>
+              <th>Profit</th>
+              <th>MR No</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <tr><td colspan="8" class="text-center">Loading master data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // APNA SCRIPT URL YAHAN DALEN
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3xVMG8iuNUw2OqZDQotN8_xCBNO-JbgYXUhdTrAqi8NKjPtViU2Zm2qOQxm12iWXyLw/exec";
+
+  function loadAdminData() {
+    fetch(SCRIPT_URL + "?action=read")
+      .then(res => res.json())
+      .then(data => {
+        let rows = "";
+        // Admin ke liye koi filter nahi, sab dikhao
+        data.forEach(item => {
+          rows += `<tr>
+            <td><span class="badge badge-primary">${item.city}</span></td>
+            <td>${item.enq_no}</td>
+            <td>${item.eval_no}</td>
+            <td>${item.pur_prc}</td>
+            <td>${item.sale_prc}</td>
+            <td class="text-success font-weight-bold">${item.profit}</td>
+            <td>${item.mr_no}</td>
+            <td>${item.date}</td>
+          </tr>`;
+        });
+        document.getElementById('adminTableBody').innerHTML = rows;
+      })
+      .catch(err => {
+        document.getElementById('adminTableBody').innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading master data.</td></tr>`;
+      });
+  }
+
+  function logout() { localStorage.clear(); window.location.href = "index.html"; }
+  
+  // Security Check
+  const user = JSON.parse(localStorage.getItem('user'));
+  if(!user || user.id !== 'admin') { window.location.href = "index.html"; }
+  else { loadAdminData(); }
+</script>
+</body>
+</html>
