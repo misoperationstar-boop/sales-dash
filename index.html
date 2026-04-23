@@ -11,15 +11,22 @@
   <div class="card card-outline card-primary">
     <div class="card-header text-center"><h1><b>Sheet</b>CRUD</h1></div>
     <div class="card-body">
+      <p class="login-box-msg">Sign in to start your session</p>
       <form id="loginForm">
         <div class="input-group mb-3">
-          <input type="email" id="email" class="form-control" placeholder="Email" required>
+          <input type="text" id="email" class="form-control" placeholder="User ID / Email" required>
           <div class="input-group-append"><div class="input-group-text"><span class="fas fa-envelope"></span></div></div>
         </div>
         <div class="input-group mb-3">
           <input type="password" id="password" class="form-control" placeholder="Password" required>
           <div class="input-group-append"><div class="input-group-text"><span class="fas fa-lock"></span></div></div>
         </div>
+        
+        <div class="input-group mb-3" id="cityGroup">
+          <input type="text" id="city" class="form-control" placeholder="Enter Your City">
+          <div class="input-group-append"><div class="input-group-text"><span class="fas fa-city"></span></div></div>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-block">Sign In</button>
       </form>
     </div>
@@ -27,24 +34,42 @@
 </div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbEqn_ge2S7R9U7sBIDuM-mYomioC49F6ev7A7DKjX5evEMHJxNJ_f2PLkHm6QmA3o/exec";
+  // Apne [dashboard.html](https://github.com/misoperationstar-boop/sales-dash/blob/main/dashboard.html) wala hi URL yahan rakhein
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3xVMG8iuNUw2OqZDQotN8_xCBNO-JbgYXUhdTrAqi8NKjPtViU2Zm2qOQxm12iWXyLw/exec";
 
   document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const data = { username: id('email').value, password: id('password').value };
     
-    fetch(`${SCRIPT_URL}?action=login`, { method: 'POST', body: JSON.stringify(data) })
-      .then(res => res.json())
-      .then(res => {
-        if(res.status === "success") {
-          localStorage.setItem('user', JSON.stringify(res));
-          window.location.href = "dashboard.html";
-        } else {
-          alert("Invalid Credentials");
-        }
-      });
+    const userVal = document.getElementById('email').value.toLowerCase().trim();
+    const passVal = document.getElementById('password').value;
+    const cityVal = document.getElementById('city').value.trim() || "All";
+
+    // ADMIN LOGIN CHECK
+    if (userVal === "admin" && passVal === "admin123") {
+        const adminData = { id: "admin", city: "All Cities", role: "admin" };
+        localStorage.setItem('user', JSON.stringify(adminData));
+        alert("Welcome Admin!");
+        window.location.href = "admin.html"; // Admin page par redirect
+    } 
+    // NORMAL USER LOGIN (Bina Google Script check ke fast login)
+    else if (userVal !== "" && passVal !== "") {
+        const userData = { id: userVal, city: cityVal, role: "user" };
+        localStorage.setItem('user', JSON.stringify(userData));
+        window.location.href = "dashboard.html"; // User page par redirect
+    } 
+    else {
+        alert("Please enter valid credentials");
+    }
   });
-  function id(i){ return document.getElementById(i); }
+
+  // Admin likhne par City box gayab karne ke liye (Optional)
+  document.getElementById('email').addEventListener('input', function() {
+    if(this.value.toLowerCase() === 'admin') {
+      document.getElementById('cityGroup').style.display = 'none';
+    } else {
+      document.getElementById('cityGroup').style.display = 'flex';
+    }
+  });
 </script>
 </body>
 </html>
