@@ -34,34 +34,42 @@
 </div>
 
 <script>
-  // Apne [dashboard.html](https://github.com/misoperationstar-boop/sales-dash/blob/main/dashboard.html) wala hi URL yahan rakhein
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3xVMG8iuNUw2OqZDQotN8_xCBNO-JbgYXUhdTrAqi8NKjPtViU2Zm2qOQxm12iWXyLw/exec";
 
   document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const userVal = document.getElementById('email').value.toLowerCase().trim();
-    const passVal = document.getElementById('password').value;
-    const cityVal = document.getElementById('city') ? document.getElementById('city').value.trim() : "All";
+    const passVal = document.getElementById('password').value.trim();
+    const cityVal = document.getElementById('city').value.trim() || "All";
 
-    // 1. ADMIN CHECK (Sabse Pehle)
+    // Debugging ke liye (Commit ke baad ise hata sakte hain)
+    console.log("Login Attempt:", userVal, passVal);
+
+    // 1. ADMIN CHECK
     if (userVal === "admin" && passVal === "admin123") {
         const adminData = { id: "admin", city: "All Cities", role: "admin" };
         localStorage.setItem('user', JSON.stringify(adminData));
-        console.log("Admin detect hua, redirecting to admin.html");
-        window.location.href = "admin.html"; // Ye line admin page par bhejegi
+        
+        alert("Admin Identified! Redirecting...");
+        
+        // GitHub Pages ke liye safe redirection
+        const loc = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        window.location.replace(loc + "admin.html");
     } 
     // 2. NORMAL USER CHECK
     else if (userVal !== "" && passVal !== "") {
         const userData = { id: userVal, city: cityVal, role: "user" };
         localStorage.setItem('user', JSON.stringify(userData));
-        window.location.href = "dashboard.html";
+        
+        const loc = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        window.location.replace(loc + "dashboard.html");
     } 
     else {
-        alert("Invalid Details");
+        alert("Invalid Details. Use admin / admin123");
     }
 });
-  // Admin likhne par City box gayab karne ke liye (Optional)
+
   document.getElementById('email').addEventListener('input', function() {
     if(this.value.toLowerCase() === 'admin') {
       document.getElementById('cityGroup').style.display = 'none';
