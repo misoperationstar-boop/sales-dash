@@ -42,26 +42,25 @@
     
     const userVal = document.getElementById('email').value.toLowerCase().trim();
     const passVal = document.getElementById('password').value;
-    const cityVal = document.getElementById('city').value.trim() || "All";
+    const cityVal = document.getElementById('city') ? document.getElementById('city').value.trim() : "All";
 
-    // ADMIN LOGIN CHECK
+    // 1. ADMIN CHECK (Sabse Pehle)
     if (userVal === "admin" && passVal === "admin123") {
         const adminData = { id: "admin", city: "All Cities", role: "admin" };
         localStorage.setItem('user', JSON.stringify(adminData));
-        alert("Welcome Admin!");
-        window.location.href = "admin.html"; // Admin page par redirect
+        console.log("Admin detect hua, redirecting to admin.html");
+        window.location.href = "admin.html"; // Ye line admin page par bhejegi
     } 
-    // NORMAL USER LOGIN (Bina Google Script check ke fast login)
+    // 2. NORMAL USER CHECK
     else if (userVal !== "" && passVal !== "") {
         const userData = { id: userVal, city: cityVal, role: "user" };
         localStorage.setItem('user', JSON.stringify(userData));
-        window.location.href = "dashboard.html"; // User page par redirect
+        window.location.href = "dashboard.html";
     } 
     else {
-        alert("Please enter valid credentials");
+        alert("Invalid Details");
     }
-  });
-
+});
   // Admin likhne par City box gayab karne ke liye (Optional)
   document.getElementById('email').addEventListener('input', function() {
     if(this.value.toLowerCase() === 'admin') {
