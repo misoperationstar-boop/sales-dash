@@ -55,7 +55,8 @@
         
         // GitHub Pages ke liye safe redirection
         const loc = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-        window.location.replace(loc + "admin.html");
+        // Is line ko purani loc wali lines se badal dein
+window.location.href = "admin.html";
     } 
     // 2. NORMAL USER CHECK
     else if (userVal !== "" && passVal !== "") {
