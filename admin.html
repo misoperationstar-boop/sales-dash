@@ -23,10 +23,9 @@
       overflow-x: hidden;
     }
 
-    /* Sidebar Styling */
     #sidebar {
       width: var(--sidebar-width);
-      height: 100vh;
+      height: 100 vh;
       position: fixed;
       background: #1e2937;
       color: white;
@@ -62,7 +61,6 @@
       background: var(--primary-color);
     }
 
-    /* Content Area */
     #content {
       margin-left: var(--sidebar-width);
       width: calc(100% - var(--sidebar-width));
@@ -100,22 +98,16 @@
       margin-right: 15px;
     }
 
-    .table-container {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
+    .city-income-card {
+        background: #fff;
+        border-left: 4px solid var(--primary-color);
+        transition: transform 0.2s;
     }
 
-    .table thead th {
-      background-color: #f8f9fa;
-      text-transform: uppercase;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      border-bottom: none;
+    .city-income-card:hover {
+        transform: translateY(-5px);
     }
 
-    /* Mobile Responsive */
     @media (max-width: 768px) {
       #sidebar { margin-left: -250px; }
       #sidebar.active { margin-left: 0; }
@@ -150,7 +142,7 @@
         </button>
         <h5 class="mb-0 ms-2">Master Overview</h5>
         <div class="ms-auto d-flex align-items-center">
-          <span class="badge bg-soft-primary text-primary border border-primary p-2 me-2">Admin Mode</span>
+          <span class="badge bg-primary text-white p-2 me-2">Admin Mode</span>
           <img src="https://ui-avatars.com/api/?name=Admin&background=0D6EFD&color=fff" class="rounded-circle" width="35" alt="Profile">
         </div>
       </div>
@@ -160,9 +152,7 @@
       <div class="row">
         <div class="col-md-4">
           <div class="card stat-card">
-            <div class="stat-icon bg-primary text-white">
-              <i class="fas fa-file-alt"></i>
-            </div>
+            <div class="stat-icon bg-primary text-white"><i class="fas fa-file-alt"></i></div>
             <div>
               <p class="text-muted mb-1 small uppercase fw-bold">Total Enquiries</p>
               <h3 class="mb-0" id="totalEnq">0</h3>
@@ -171,20 +161,16 @@
         </div>
         <div class="col-md-4">
           <div class="card stat-card">
-            <div class="stat-icon bg-success text-white">
-              <i class="fas fa-indian-rupee-sign"></i>
-            </div>
+            <div class="stat-icon bg-success text-white"><i class="fas fa-indian-rupee-sign"></i></div>
             <div>
-              <p class="text-muted mb-1 small uppercase fw-bold">Total Profit</p>
+              <p class="text-muted mb-1 small uppercase fw-bold">Total Profit (All Time)</p>
               <h3 class="mb-0" id="totalProfit">₹ 0</h3>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card stat-card">
-            <div class="stat-icon bg-warning text-white">
-              <i class="fas fa-city"></i>
-            </div>
+            <div class="stat-icon bg-warning text-white"><i class="fas fa-city"></i></div>
             <div>
               <p class="text-muted mb-1 small uppercase fw-bold">Active Cities</p>
               <h3 class="mb-0" id="activeCities">0</h3>
@@ -193,14 +179,17 @@
         </div>
       </div>
 
+      <h5 class="mb-3 fw-bold mt-2"><i class="fas fa-chart-pie me-2 text-primary"></i>City-wise Monthly Income (Current Month)</h5>
+      <div class="row mb-4" id="cityMonthlyContainer">
+        <div class="col-12 text-center text-muted small">Loading city stats...</div>
+      </div>
+
       <div class="card">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
           <h6 class="mb-0 fw-bold">Master Sales Report</h6>
-          <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary" onclick="loadAllData()">
-              <i class="fas fa-download me-1"></i> Refresh
-            </button>
-          </div>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadAllData()">
+            <i class="fas fa-sync-alt me-1"></i> Refresh
+          </button>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -239,14 +228,28 @@
           let rows = "";
           let totalP = 0;
           let cities = new Set();
+          let cityMonthlyIncome = {};
           
+          const now = new Date();
+          const currentMonth = now.getMonth(); // 0-11
+          const currentYear = now.getFullYear();
+
           if(!data || data.length === 0) {
-              rows = "<tr><td colspan='5' class='text-center py-5'>No records found in Sales sheet.</td></tr>";
+              rows = "<tr><td colspan='5' class='text-center py-5 text-muted'>No records found.</td></tr>";
+              document.getElementById('cityMonthlyContainer').innerHTML = '<div class="col-12 text-center small text-muted">No data for monthly analysis.</div>';
           } else {
               data.forEach(item => {
                 const profitValue = parseFloat(item.profit) || 0;
+                const cityName = (item.city || 'Unknown').trim().toUpperCase();
+                const itemDate = new Date(item.date);
+                
                 totalP += profitValue;
-                if(item.city) cities.add(item.city.toLowerCase().trim());
+                if(item.city) cities.add(cityName);
+
+                // Monthly Logic
+                if (itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear) {
+                    cityMonthlyIncome[cityName] = (cityMonthlyIncome[cityName] || 0) + profitValue;
+                }
 
                 rows += `
                   <tr>
@@ -277,6 +280,24 @@
                   </tr>`;
               });
               
+              // Generate City Cards
+              let cityHtml = "";
+              Object.keys(cityMonthlyIncome).forEach(city => {
+                  cityHtml += `
+                    <div class="col-md-3">
+                        <div class="card stat-card city-income-card mb-3">
+                            <div class="w-100">
+                                <p class="text-muted mb-1 small fw-bold">${city}</p>
+                                <h4 class="mb-0 text-primary">₹${cityMonthlyIncome[city].toLocaleString()}</h4>
+                                <small class="text-muted">This Month</small>
+                            </div>
+                        </div>
+                    </div>`;
+              });
+              
+              if(cityHtml === "") cityHtml = '<div class="col-12 text-center small text-muted">No sales found for current month.</div>';
+              document.getElementById('cityMonthlyContainer').innerHTML = cityHtml;
+
               // Summary Updates
               document.getElementById('totalEnq').innerText = data.length;
               document.getElementById('totalProfit').innerText = "₹ " + totalP.toLocaleString();
@@ -294,12 +315,10 @@
       window.location.href = "index.html"; 
     }
 
-    // Sidebar Toggle
     document.getElementById('sidebarCollapse').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('active');
     });
 
-    // Check Login
     const user = JSON.parse(localStorage.getItem('user'));
     if(!user || user.id !== 'admin') {
         window.location.href = "index.html";
