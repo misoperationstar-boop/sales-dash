@@ -2,81 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Login | CRUD System</title>
+  <title>Login | Sales Dash</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="card card-outline card-primary">
-    <div class="card-header text-center"><h1><b>Sheet</b>CRUD</h1></div>
+    <div class="card-header text-center"><h1><b>Sales</b>Dash</h1></div>
     <div class="card-body">
       <p class="login-box-msg">Sign in to start your session</p>
       <form id="loginForm">
         <div class="input-group mb-3">
-          <input type="text" id="email" class="form-control" placeholder="User ID / Email" required>
-          <div class="input-group-append"><div class="input-group-text"><span class="fas fa-envelope"></span></div></div>
+          <input type="text" id="email" class="form-control" placeholder="Username" required>
+          <div class="input-group-append"><div class="input-group-text"><span class="fas fa-user"></span></div></div>
         </div>
         <div class="input-group mb-3">
           <input type="password" id="password" class="form-control" placeholder="Password" required>
           <div class="input-group-append"><div class="input-group-text"><span class="fas fa-lock"></span></div></div>
         </div>
-        
-        <div class="input-group mb-3" id="cityGroup">
-          <input type="text" id="city" class="form-control" placeholder="Enter Your City">
-          <div class="input-group-append"><div class="input-group-text"><span class="fas fa-city"></span></div></div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-block">Sign In</button>
       </form>
     </div>
   </div>
 </div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3xVMG8iuNUw2OqZDQotN8_xCBNO-JbgYXUhdTrAqi8NKjPtViU2Zm2qOQxm12iWXyLw/exec";
+  // DHAYAN DEIN: Yahan apna wahi naya URL dalein jo addUser ke liye use kiya tha
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0Dd6KsXBsJtZPz4-Dx0NOU6GCHujikpswtF8pUrxFp-mcdjvmc_THM2C7y9BgG_P1/exec";
 
   document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
-    const userVal = document.getElementById('email').value.toLowerCase().trim();
+    const btn = document.getElementById('loginBtn');
+    const userVal = document.getElementById('email').value.trim();
     const passVal = document.getElementById('password').value.trim();
-    const cityVal = document.getElementById('city').value.trim() || "All";
 
-    // Debugging ke liye (Commit ke baad ise hata sakte hain)
-    console.log("Login Attempt:", userVal, passVal);
+    // UI Loading
+    btn.disabled = true;
+    btn.innerText = "Checking...";
 
-    // 1. ADMIN CHECK
-    if (userVal === "admin" && passVal === "admin123") {
-        const adminData = { id: "admin", city: "All Cities", role: "admin" };
-        localStorage.setItem('user', JSON.stringify(adminData));
-        
-        alert("Admin Identified! Redirecting...");
-        
-        // GitHub Pages ke liye safe redirection
-        const loc = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-        // Is line ko purani loc wali lines se badal dein
-window.location.href = "admin.html";
-    } 
-    // 2. NORMAL USER CHECK
-    else if (userVal !== "" && passVal !== "") {
-        const userData = { id: userVal, city: cityVal, role: "user" };
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-        const loc = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-        window.location.replace(loc + "dashboard.html");
-    } 
-    else {
-        alert("Invalid Details. Use admin / admin123");
+    // 1. Static Admin Bypass (Ya isse bhi sheet se handle kar sakte hain)
+    if (userVal.toLowerCase() === "admin" && passVal === "admin123") {
+        localStorage.setItem('user', JSON.stringify({ id: "admin", city: "All", role: "admin" }));
+        window.location.href = "admin.html";
+        return;
     }
-});
 
-  document.getElementById('email').addEventListener('input', function() {
-    if(this.value.toLowerCase() === 'admin') {
-      document.getElementById('cityGroup').style.display = 'none';
-    } else {
-      document.getElementById('cityGroup').style.display = 'flex';
-    }
+    // 2. Real-time Sheet Login Check
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "login",
+        username: userVal,
+        password: passVal
+      })
+    })
+    .then(res => res.json())
+    .then(response => {
+      if (response.status === "success") {
+          // Response mein City sheet se aayegi (e.g. SAGAR, MUMBAI)
+          localStorage.setItem('user', JSON.stringify({
+            id: userVal,
+            city: response.city,
+            name: response.name,
+            role: response.role
+          }));
+          
+          alert("Welcome " + response.name + "! Your City: " + response.city);
+          window.location.href = "dashboard.html";
+      } else {
+          alert("Ghalat Username ya Password!");
+          btn.disabled = false;
+          btn.innerText = "Sign In";
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Server error! Check if Script URL is correct.");
+      btn.disabled = false;
+      btn.innerText = "Sign In";
+    });
   });
 </script>
 </body>
