@@ -13,6 +13,7 @@
     :root { --primary-color: #0d6efd; --sidebar-width: 250px; --sidebar-bg: #1e2937; }
     body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; margin: 0; }
 
+    /* Sidebar Fix: Pura niche tak black/dark rahega */
     #sidebar { 
       width: var(--sidebar-width); 
       height: 100vh; 
@@ -28,19 +29,31 @@
     }
 
     #sidebar .sidebar-header { padding: 25px 20px; background: #111827; text-align: center; border-bottom: 1px solid #2d3748; }
+    
     #sidebar ul.components { padding: 15px 0; flex-grow: 1; }
-    #sidebar ul li a { padding: 15px 25px; display: block; color: #9ca3af; text-decoration: none; font-size: 0.95rem; transition: 0.2s; cursor: pointer; }
+    
+    #sidebar ul li a { padding: 15px 25px; display: block; color: #9ca3af; text-decoration: none; font-size: 0.95rem; transition: 0.2s; }
     #sidebar ul li a:hover, #sidebar ul li.active > a { background: #374151; color: white; border-left: 4px solid var(--primary-color); }
 
-    #content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); min-height: 100vh; transition: all 0.3s; }
+    /* Content Area */
+    #content { 
+      margin-left: var(--sidebar-width); 
+      width: calc(100% - var(--sidebar-width)); 
+      min-height: 100vh; 
+      transition: all 0.3s; 
+    }
+
     .navbar { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 15px 30px; }
+
     .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 24px; }
     .stat-card { padding: 20px; display: flex; align-items: center; }
     .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 15px; }
+
     .city-profit-card { border-top: 4px solid var(--primary-color); position: relative; overflow: hidden; }
     .city-profit-card .city-name { font-size: 0.8rem; letter-spacing: 1px; color: #6c757d; }
     .city-profit-card .profit-val { color: #198754; font-weight: 700; }
 
+    /* Responsive */
     @media (max-width: 768px) { 
       #sidebar { margin-left: -250px; } 
       #sidebar.active { margin-left: 0; } 
@@ -56,7 +69,6 @@
     </div>
     <ul class="list-unstyled components">
       <li class="active"><a href="#"><i class="fas fa-home me-2"></i> Dashboard</a></li>
-      <li><a data-bs-toggle="modal" data-bs-target="#userModal"><i class="fas fa-user-plus me-2"></i> Create City User</a></li>
       <li><a href="#" onclick="loadAllData()"><i class="fas fa-sync me-2"></i> Sync Data</a></li>
       <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
     </ul>
@@ -136,58 +148,8 @@
     </div>
   </div>
 
-  <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold"><i class="fas fa-user-plus me-2"></i>Create City User</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="userForm">
-          <div class="modal-body p-4">
-            <div class="mb-3">
-              <label class="form-label fw-bold small">City Name</label>
-              <input type="text" id="newCity" class="form-control" placeholder="e.g. MUMBAI" required style="text-transform: uppercase;">
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold small">User ID (Login Username)</label>
-              <input type="text" id="newUserId" class="form-control" placeholder="e.g. mumbai_admin" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold small">Password</label>
-              <input type="password" id="newUserPass" class="form-control" placeholder="Set password" required>
-            </div>
-            <div class="alert alert-info py-2 small mb-0">
-              <i class="fas fa-info-circle me-1"></i> Yeh user sirf apni assigned city ka data dekh/bhar payega.
-            </div>
-          </div>
-          <div class="modal-footer bg-light">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary px-4">Create User</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyG60F9k-2O_71qubS9yBaJ_p4p0TNNnWG6GDeHaYFj1GYlLsG9iw-vCIyt-h-sj5t4dA/exec";
-
-    // City User Creation Functionality
-    document.getElementById('userForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const city = document.getElementById('newCity').value.toUpperCase();
-        const userId = document.getElementById('newUserId').value;
-        const pass = document.getElementById('newUserPass').value;
-
-        // Note: Yahan aapko apne Google Script me ek "addUser" action banana hoga
-        // filhal main demo alert de raha hoon.
-        alert(`User Created Successfully!\nCity: ${city}\nID: ${userId}`);
-        
-        const modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
-        modal.hide();
-        this.reset();
-    });
 
     function loadAllData() {
       fetch(SCRIPT_URL + "?action=read")
